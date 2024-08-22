@@ -25,7 +25,6 @@ public class LoginButton extends BaseTest {
 
         AccountPage accountPage = new AccountPage(getDriver()).load();
         accountPage.login();
-        //Assert.assertEquals(accountPage.getErrorTxt(), "Error: The password you entered for the username " + user.getUsername() + " is incorrect. Lost your password?");
 
 
         String loginB =  accountPage.login();
