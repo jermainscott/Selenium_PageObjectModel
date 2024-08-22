@@ -1,0 +1,251 @@
+package org.selenium.pom.pages;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.selenium.pom.base.BasePage;
+import org.selenium.pom.objects.BillingAddress;
+import org.selenium.pom.objects.User;
+
+import java.time.Duration;
+
+public class CheckoutPage extends BasePage {
+    private final By firstnameFld = By.id("billing_first_name");
+    private final By lastNameFld = By.id("billing_last_name");
+    private final By addressLineOneFld = By.id("billing_address_1");
+    private final By billingCityFld = By.id("billing_city");
+    private final By billingPostCodeFld = By.id("billing_postcode");
+    private final By billingEmailFld = By.id("billing_email");
+    private final By placeOrderBtn = By.id("place_order");
+    private final By successNotice = By.cssSelector(".woocommerce-notice");
+
+    private final By clickHereToLoginLink = By.className("showlogin");
+    private final By usernameFld = By.id("username");
+    private final By passwordFld = By.id("password");
+    private final By loginBtn = By.name("login");
+    private final By overlay = By.cssSelector(".blockUI.blockOverlay");
+
+    private final By countryDropDown = By.id("billing_country");
+    private final By stateDropDown = By.id("billing_state");
+
+    private final By alternateCountryDropDown = By.id("select2-billing_country-container");
+    private final By alternateStateDropDown = By.id("select2-billing_state-container");
+
+    private final By directBankTransferRadioBtn = By.id("payment_method_bacs");
+    private final By cashOnDeliveryTransferRadioBtn = By.id("payment_method_cod");
+
+    private final By productName = By.cssSelector("td[class='product-name']");
+
+    public CheckoutPage(WebDriver driver) {
+        super(driver);
+    }
+
+    public CheckoutPage load() {
+        load("/checkout/");
+        return this;
+    }
+
+    public CheckoutPage enterFirstName(String firstName) {
+        WebElement e = wait.until(ExpectedConditions.visibilityOfElementLocated(firstnameFld));
+        e.clear();
+        e.sendKeys(firstName);
+        return this;
+    }
+
+    public CheckoutPage enterLastName(String lastName) {
+        WebElement e = wait.until(ExpectedConditions.visibilityOfElementLocated(lastNameFld));
+        e.clear();
+        e.sendKeys(lastName);
+        return this;
+    }
+
+    public CheckoutPage selectCountry(String countryName) {
+/*        Select select = new Select(driver.findElement(countryDropDown));
+        select.selectByVisibleText(countryName);*/
+        wait.until(ExpectedConditions.elementToBeClickable(alternateCountryDropDown)).click();
+        WebElement e = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[text()='" + countryName + "']")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", e);
+        e.click();
+        return this;
+    }
+
+    public CheckoutPage enterAddressLineOne(String addressLineOne) {
+        WebElement e = wait.until(ExpectedConditions.visibilityOfElementLocated(addressLineOneFld));
+        e.clear();
+        e.sendKeys(addressLineOne);
+        return this;
+    }
+
+    public CheckoutPage enterCity(String city) {
+        WebElement e = wait.until(ExpectedConditions.visibilityOfElementLocated(billingCityFld));
+        e.clear();
+        e.sendKeys(city);
+        return this;
+    }
+
+    public CheckoutPage selectState(String stateName) {
+/*        Select select = new Select(driver.findElement(stateDropDown));
+        select.selectByVisibleText(stateName);*/
+        wait.until(ExpectedConditions.elementToBeClickable(alternateStateDropDown)).click();
+        WebElement e = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[text()='" + stateName + "']")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", e);
+        e.click();
+        return this;
+    }
+
+    public CheckoutPage enterPostCode(String postCode) {
+        WebElement e = wait.until(ExpectedConditions.visibilityOfElementLocated(billingPostCodeFld));
+        e.clear();
+        e.sendKeys(postCode);
+        return this;
+    }
+
+    public CheckoutPage enterEmail(String email) {
+        WebElement e = wait.until(ExpectedConditions.visibilityOfElementLocated(billingEmailFld));
+        e.clear();
+        e.sendKeys(email);
+        return this;
+    }
+
+    public CheckoutPage setBillingAddress(BillingAddress billingAddress) throws InterruptedException {
+        return enterFirstName(billingAddress.getFirstName()).
+                enterLastName(billingAddress.getLastName()).
+                selectCountry(billingAddress.getCountry()).
+                enterAddressLineOne(billingAddress.getAddressLineOne()).
+                enterCity(billingAddress.getCity()).
+                selectState(billingAddress.getState()).
+                enterPostCode(billingAddress.getPostalCode()).
+                enterEmail(billingAddress.getEmail());
+    }
+
+    public CheckoutPage placeOrder() {
+        waitForOverlaysToDisappear(overlay);
+        driver.findElement(placeOrderBtn).click();
+        return this;
+    }
+
+    public String getNotice() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(successNotice)).getText();
+    }
+
+    public CheckoutPage clickHereToLoginLink() {
+        wait.until(ExpectedConditions.elementToBeClickable(clickHereToLoginLink)).click();
+        return this;
+    }
+
+    public CheckoutPage enterUserName(String username) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(usernameFld)).sendKeys(username);
+        return this;
+    }
+
+    public CheckoutPage enterPassword(String password) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(passwordFld)).sendKeys(password);
+        return this;
+    }
+
+    public CheckoutPage clickLoginBtn() {
+        wait.until(ExpectedConditions.elementToBeClickable(loginBtn)).click();
+        return this;
+    }
+
+    private CheckoutPage waitForLoginBtnToDisappear() {
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(loginBtn));
+        return this;
+    }
+
+    public CheckoutPage login(User user) {
+        return enterUserName(user.getUsername()).
+                enterPassword(user.getPassword()).
+                clickLoginBtn().waitForLoginBtnToDisappear();
+    }
+
+    public CheckoutPage selectDirectBankTransfer() {
+        WebElement e = wait.until(ExpectedConditions.elementToBeClickable(directBankTransferRadioBtn));
+        if (!e.isSelected()) {
+            e.click();
+        }
+        return this;
+    }
+
+    public CheckoutPage selectCashOnDeliveryTransfer() {
+        wait.until(ExpectedConditions.elementToBeClickable(cashOnDeliveryTransferRadioBtn)).click();
+
+        return this;
+    }
+
+
+    public String getProductName() throws Exception {
+        int i = 5;
+        while (i > 0) {
+            try {
+                return wait.until(ExpectedConditions.visibilityOfElementLocated(productName)).getText();
+            } catch (StaleElementReferenceException e) {
+                System.out.println("NOT FOUND. TRYING AGAIN" + e);
+            }
+            Thread.sleep(5000);
+            i--;
+        }
+        throw new Exception("Element not found");
+    }
+
+    public String getTaxAmount(String stateAbbreviation) {
+        //String taxText = driver.findElement(By.className("woocommerce-Price-amount amount")).getText();
+       // WebElement element = driver.findElement(By.cssSelector("td[data-title='"+ stateAbbreviation +" State Tax'] span.woocommerce-Price-amount.amount"));
+     //   WebElement taxElement = driver.findElement(By.xpath("//td[contains(@data-title, 'Tax')]//span[@class='woocommerce-Price-amount amount']"));
+
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        waitForOverlaysToDisappear(overlay);
+       WebElement taxElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//tr[contains(@class, 'tax-rate')]//td//span[@class='woocommerce-Price-amount amount']")));
+
+
+
+        return taxElement.getText().replace("$","");
+    }
+
+
+
+    public Double getTotalAmount() {
+        String totalText = driver.findElement(By.cssSelector(".order-total")).getText();
+        return parsePrice(totalText.split("\\$")[1]);
+    }
+
+
+    public Double parsePrice(String priceText) {
+      //   priceText = priceText.replaceAll("[^\\d.]", ""); // Remove all non-numeric characters
+        System.out.println("Parse Price Output" +  Double.parseDouble(priceText));
+        return Double.parseDouble(priceText);
+                //.split("\\$")[0]);
+
+    }
+
+// Created these Methods for my SalesTaxTest 2.0
+    public Double getTaxAmount() {
+        String taxText = driver.findElement(By.cssSelector(".tax-total .woocommerce-Price-amount")).getText();
+        return parsePrice(taxText);  // Implement parsePrice() to convert the text to a double
+    }
+
+    public Double calculateExpectedTax(Double expectedTaxRate) {
+        Double subtotal = getSubtotalAmount();  // Implement getSubtotalAmount() to fetch the subtotal amount
+        return subtotal * (expectedTaxRate / 100);
+    }
+
+    public Double getSubtotalAmount() {
+        // Locate the subtotal element on the page
+        String subtotalText = driver.findElement(By.cssSelector(".cart-subtotal .woocommerce-Price-amount")).getText();
+
+        // Convert the subtotal text to a double value
+        return Double.valueOf(subtotalText.replace("$", ""));
+
+                //parsePrice(subtotalText);
+    }
+
+
+
+
+
+}
+
+
